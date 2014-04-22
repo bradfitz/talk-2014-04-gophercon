@@ -1,3 +1,6 @@
+// TODO: ssh -i /Users/bradfitz/.ssh/id_rsa_boot2docker -o StrictHostKeyChecking=no  -o UserKnownHostsFile=/dev/null -p 2022 docker@localhost
+// for proxying ports
+
 package main
 
 import (
@@ -9,13 +12,17 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 var (
@@ -24,17 +31,25 @@ var (
 	tagFlag    = flag.String("tag", "", "If non-empty, we're the child process and we should start or attach to this gc14:<tag> VM.")
 )
 
+var presentURL = httputil.NewSingleHostReverseProxy(&url.URL{
+	Scheme: "http",
+	Host:   "127.0.0.1:3999",
+	Path:   "/",
+})
+
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		http.Redirect(w, r, "http://localhost:3999/2014-04-Gophercon.slide#1", http.StatusFound)
+	path := r.URL.Path
+	if path == "/" || strings.HasSuffix(path, ".slide") || strings.HasPrefix(path, "/static/") {
+		presentURL.ServeHTTP(w, r)
 		return
 	}
 	http.NotFound(w, r)
 }
 
 type Shell struct {
-	p    *os.Process
-	port int
+	p     *os.Process
+	port  int
+	proxy http.Handler
 }
 
 var (
@@ -44,11 +59,14 @@ var (
 
 func handleShell(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimPrefix(r.URL.Path, "/shell/")
+	if i := strings.Index(name, "/"); i >= 0 {
+		name = name[:i]
+	}
 	mu.Lock()
 	p, ok := shell[name]
 	mu.Unlock()
 	if ok {
-		http.Redirect(w, r, fmt.Sprintf("http://localhost:%d/%s/", p.port, name), http.StatusFound)
+		p.proxy.ServeHTTP(w, r)
 		return
 	}
 	groupsb, err := exec.Command("groups").Output()
@@ -62,7 +80,6 @@ func handleShell(w http.ResponseWriter, r *http.Request) {
 export DOCKER_HOST=%s
 %s --tag=%s --docker=%s
 `, os.Getenv("DOCKER_HOST"), os.Args[0], name, dockerPath)
-	log.Printf("Writing script: %s", script)
 	f, err := ioutil.TempFile("", "")
 	if err != nil {
 		log.Fatalf("TempFile: %v", err)
@@ -76,21 +93,34 @@ export DOCKER_HOST=%s
 		log.Fatal(err)
 	}
 	port := freePort()
-	cmd := exec.Command("shellinaboxd",
+	args := []string{
+		"--no-beep",
 		"--disable-ssl",
 		fmt.Sprintf("--port=%d", port),
-		fmt.Sprintf("--service=/%s:%s:%s:%s:%s", name, u.Username, groups[0], u.HomeDir, f.Name()))
-	log.Printf("Running: %q", cmd.Args)
+		fmt.Sprintf("--service=/shell/%s:%s:%s:%s:%s", name, u.Username, groups[0], u.HomeDir, f.Name()),
+	}
+	css := filepath.Join(os.Getenv("HOME"), "talks", "2014-04-Gophercon", "shell.css")
+	if _, err := os.Stat(css); err == nil {
+		args = append(args, "--css="+css)
+	}
+	cmd := exec.Command("shellinaboxd", args...)
+	// log.Printf("Running: %q", cmd.Args)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "127.0.0.1:" + strconv.Itoa(port),
+		Path:   "/",
+	})
 	mu.Lock()
 	shell[name] = &Shell{
-		p:    cmd.Process,
-		port: port,
+		p:     cmd.Process,
+		port:  port,
+		proxy: proxy,
 	}
 	mu.Unlock()
 	go func() {
@@ -100,7 +130,8 @@ export DOCKER_HOST=%s
 		defer mu.Unlock()
 		delete(shell, name)
 	}()
-	http.Redirect(w, r, fmt.Sprintf("http://localhost:%d/%s/", port, name), http.StatusFound)
+	time.Sleep(150 * time.Millisecond) // warm up time
+	proxy.ServeHTTP(w, r)
 }
 
 func freePort() int {
@@ -142,7 +173,7 @@ func main() {
 	http.HandleFunc("/", handleRoot)
 
 	log.Printf("Presenting to Gophercon 2014 on http://%s", *listenFlag)
-	go exec.Command("open", "http://localhost:3999/2014-04-Gophercon.slide#1").Start()
+	go exec.Command("open", "http://"+*listenFlag+"/2014-04-Gophercon.slide#1").Start()
 	log.Fatal(http.ListenAndServe(*listenFlag, nil))
 }
 
