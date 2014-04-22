@@ -1,0 +1,237 @@
+Camlistore
+24 Feb 2014
+Tags: camlistore, go, gophercon
+
+Brad Fitzpatrick
+@bradfitz
+brad@danga.com
+http://bradfitz.com/
+
+* Foo
+
+.link http://localhost:3998/shell/earlygo Early go
+
+* Camlistore
+
+- ~4 years open source
+- "Camlistore is a way to store, sync, share, model and back up content"
+
+* Motivation
+
+- I've written too many Content Management Systems
+- blogs, comments, photos, emails, backups, scanned paperwork, ...
+- is a scanned photo a scan, a photo, or a blog post? who cares.
+- write *one CMS to rule them all*
+- ... or at least a good framework for higher-level CMSes
+
+* Protocols, not companies
+
+- I believe in protocols and standards
+- ... not in companies
+- Companies can run hosted versions of protocols (gmail for IMAP+SMTP)
+- ... but I control where my domain name points to
+
+* Overview
+
+- "personal storage system for life"
+- user in control
+- everything private by default
+- no corporate SPOF
+
+* Problem
+
+- tools vs storage
+- should be separate roles
+- "The cloud" has started to blend them together
+- separate them back out
+
+* What I want
+
+- something simple
+- something cheap
+- something reliable (survive past me)
+- to not worry (about sync, about companies)
+
+* Data archaeology
+
+- data and data models should be easy to understand
+- now
+- and in 100+ years
+
+* Camlistore is....
+
+- one private dumping ground to store anything
+- ... backups, filesystems, objects, photos, likes, bookmarks, shares, my website, ...
+- ... copy of everything (every web page) I read.
+- live backup my phones
+- live replication / sync of my dumping group between my house & laptop & {Amazon,Google,Dropbox}{2,}
+- web UI, FUSE, CLI tools
+- Easy for end-users; powerful for dorks
+
+* Security model
+
+- *your* private repo, for life
+- everything private by default
+- grant access to specific objects/trees with friends or the world
+- web UI or CLI tools let you share
+
+* Camlistore's terrible name
+
+- Content-Addressable
+- Multi-Level
+- Indexed
+- Storage
+
+* Advantages of Content-addressable
+
+- sync any which way, no conflicts
+- (merge resolution at higher layers)
+- corruption verification/repair
+- de-duping
+
+* Multi-Level
+
+- blob storage
+- indexing
+- search
+- web UI, FUSE, CLI, apps are just clients of search + blob storage.
+
+* Logically
+
+.image arch.png
+
+* Reality
+
+- Normal users: hosted version
+- Dorks: single self-contained binary
+
+* From the bottom up...
+
+* Blob Server
+
+* Blob Server (very dumb)
+
+- "Blob": 0B - 16MB
+- private operations, to owner of data only:
+- ... Get, Put
+- ... Stat (check existence + get size)
+- ... Enumerate all blobs
+- no public (non-owner) access
+- HTTP interface: {GET,PUT,HEAD} /sha1-xxxxxxx HTTP/1.1
+- Delete is disabled by default. Privileged op for GC only.
+
+* Blob Server: seriously, no metadata
+
+- no filenames
+- no "mime types"
+- no "{create,mod,access} time"
+- size is implicit
+- blob: just some bytes
+- metadata? layers above.
+
+* Modeling data
+
+* Modeling static data
+
+(demo)
+
+* Modeling dynamic data
+
+- how to represent mutable data in a content-addressable world?
+- mutations would change root "commit" hash
+
+* Permanodes
+
+* Permanodes
+
+- immutable handle to reference ("the permanode")
+- mutation claims against that permanode (their own claims)
+- data model: key/values
+- all keys' values are single- or multi-valued
+- ... convention per-key
+
+* Permanodes 
+
+(demo)
+
+* Overview
+
+.image fsbackup.png
+
+* Two abstractions
+
+- [[http://localhost:6060/pkg/camlistore.org/pkg/blobserver/#Storage][Blob storage]] (sha1-xxxx -> bytes)
+- [[http://localhost:6060/pkg/camlistore.org/pkg/sorted/#KeyValue][sorted.KeyValue]] (get, set, enumerate)
+
+* 1) Blob storage
+
+- get/set content-addressable blobs
+- size: 1 byte to 16 MB. (in practice: 64-256 KB)
+- enumerate all
+- filesystem, block device, S3, Google Storage, Google Drive, App Engine, WeedFS, ...
+
+* 2) Key/Value storage
+
+- atomically set/delete 1+ Key = Value
+- atomic commits
+- aribtrary keys and values
+- enumerate in sorted order
+- SQLite, MySQL, Postgres, Mongo, LevelDB, cznic/kv, Dynamo, App Engine, ...
+
+* Import / export
+
+- slurp from web services into Camlistore
+- ... Flickr, LJ, Facebook, G+, Twitter, Foursquare, etc...
+- export to whoever you want, under any API
+
+* Storing big files
+
+- rolling checksums
+- 32-bit checksum over 64 byte rolling window
+- 14 or more lower bits sets: break point
+- more bits -> stronger break
+
+* FUSE
+
+- proper filesystem, not rsync hackery
+- can have TBs logically available on 100 GB laptop
+- ...
+- (demo)
+
+* Web UI
+
+- React
+- Infinite scroll
+- Lightbox
+- HTML history API
+- Search
+
+* Search
+
+- high-level one-liner expression search ("is:image -format:jpeg")
+- low-level structured search (nested tree of operators, fields, set unions/intersections, etc)
+
+.image search.png
+
+* Tools
+
+- camget (blobs, trees, shares)
+- camput (blobs, files, dirs, shares, permanodes, claims)
+- camtool {init,sync,init,describe,claims,...}
+- cammount
+
+* Camlistore is pure Go: (no C)
+
+- HTTP client/server, TLS, AES, ...
+- JSON, XML
+- WebSockets
+- SMTP server
+- Rolling checksums
+- GIF/JPG/PNG enc/dec, resizing, thumbnails
+- FUSE
+- Notification bus
+- database/sql, MySQL, Postgres, Mongo, 
+- OpenPGP signing & verification
+- ....
+
+* More demos, questions
