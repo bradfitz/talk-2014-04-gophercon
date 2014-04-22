@@ -6,6 +6,8 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -18,6 +20,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -57,7 +60,14 @@ var (
 	shell = map[string]*Shell{}
 )
 
+var shellPortRx = regexp.MustCompile(`^/shell/(\S+?)/(\d{2,5})\b`)
+
 func handleShell(w http.ResponseWriter, r *http.Request) {
+	if m := shellPortRx.FindStringSubmatch(r.URL.Path); m != nil {
+		port, _ := strconv.Atoi(m[2])
+		handleShellPort(w, r, m[1], port)
+		return
+	}
 	name := strings.TrimPrefix(r.URL.Path, "/shell/")
 	if i := strings.Index(name, "/"); i >= 0 {
 		name = name[:i]
@@ -134,6 +144,55 @@ export DOCKER_HOST=%s
 	proxy.ServeHTTP(w, r)
 }
 
+func handleShellPort(w http.ResponseWriter, r *http.Request, tag string, port int) {
+	outb, err := exec.Command("docker", "ps", "--no-trunc").CombinedOutput()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	sc := bufio.NewScanner(bytes.NewReader(outb))
+	img := "gc14:" + tag
+	var containers []string
+	for sc.Scan() {
+		if strings.Contains(sc.Text(), img) {
+			fields := strings.Fields(sc.Text())
+			containers = append(containers, fields[0])
+		}
+	}
+	if len(containers) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	ip, err := IP(containers[0])
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	localPort := freePort()
+	cmd := exec.Command("ssh",
+		"-i", filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa_boot2docker"),
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "ExitOnForwardFailure=yes",
+		"-o", "UserKnownHostsFile=/dev/null",
+		"-p", "2022",
+		"docker@localhost",
+		fmt.Sprintf("-L%d:%s:%d", localPort, ip, port),
+		"-N")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Start(); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	go func() {
+		if err := cmd.Wait(); err != nil {
+			log.Printf("ssh port forward ended for %s: %v", tag, err)
+		}
+	}()
+	time.Sleep(100 * time.Millisecond)
+	http.Redirect(w, r, fmt.Sprintf("http://127.0.0.1:%d", localPort), http.StatusFound)
+}
+
 func freePort() int {
 	for p := 3900; p < 4200; p++ {
 		c, err := net.Dial("tcp", "localhost:"+strconv.Itoa(p))
@@ -187,15 +246,25 @@ func startAttachTag(tag string) {
 	}
 	sc := bufio.NewScanner(bytes.NewReader(outb))
 	img := "gc14:" + tag
+	var containers []string
 	for sc.Scan() {
 		if strings.Contains(sc.Text(), img) {
 			fields := strings.Fields(sc.Text())
-			if err := syscall.Exec(*dockerFlag,
-				[]string{*dockerFlag, "attach", fields[0]},
-				os.Environ()); err != nil {
-				log.Fatalf("docker attach exec: %v", err)
-			}
-
+			containers = append(containers, fields[0])
+		}
+	}
+	switch {
+	case len(containers) > 1:
+		for _, container := range containers {
+			// Best effort:
+			exec.Command(*dockerFlag, "kill", container).Run()
+			exec.Command(*dockerFlag, "rm", container).Run()
+		}
+	case len(containers) == 1:
+		if err := syscall.Exec(*dockerFlag,
+			[]string{*dockerFlag, "attach", containers[0]},
+			os.Environ()); err != nil {
+			log.Fatalf("docker attach exec: %v", err)
 		}
 	}
 	if err := syscall.Exec(*dockerFlag,
@@ -203,4 +272,29 @@ func startAttachTag(tag string) {
 		os.Environ()); err != nil {
 		log.Fatalf("docker run exec: %v", err)
 	}
+}
+
+// IP returns the IP address of the container.
+func IP(containerID string) (string, error) {
+	out, err := exec.Command("docker", "inspect", containerID).Output()
+	if err != nil {
+		return "", err
+	}
+	type networkSettings struct {
+		IPAddress string
+	}
+	type container struct {
+		NetworkSettings networkSettings
+	}
+	var c []container
+	if err := json.NewDecoder(bytes.NewReader(out)).Decode(&c); err != nil {
+		return "", err
+	}
+	if len(c) == 0 {
+		return "", errors.New("no output from docker inspect")
+	}
+	if ip := c[0].NetworkSettings.IPAddress; ip != "" {
+		return ip, nil
+	}
+	return "", fmt.Errorf("could not find an IP for %v. Not running?", containerID)
 }
