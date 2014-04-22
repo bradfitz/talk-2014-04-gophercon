@@ -1,4 +1,4 @@
-Camlistore
+Camlistore & The Standard Library
 24 Feb 2014
 Tags: camlistore, go, gophercon
 
@@ -7,9 +7,113 @@ Brad Fitzpatrick
 brad@danga.com
 http://bradfitz.com/
 
-* Foo
+* Story time
+
+- How I got into Go
+- Prepare to learn nothing
+
+* Pre-Google
+
+* Pre-Google
+
+- Perl & C
+- Slow & fun ... or fast & tedious.
+- Happy enough.
+
+* Late 2007
+
+* Google language options:
+
+- C++, Java, and Python
+- Fast & tedious
+- Verbose & tedious
+- Slow & tedious
+- (oh, and Sawzall: weird & kinda neat but often lacking)
+
+* Late 2008 Techtalk
+
+"Does the language have closures?"
+
+"Yeah, yeah, everybody wants their pet feature."
+
+- But glimmer of hope: not C++, not Java, not Python.
+- (Go gets closures in February anyway)
+
+* 2009
+
+- Android, write even more Java.
+
+.link http://google-opensource.blogspot.com/2009/11/hey-ho-lets-go.html November: Go is open source 
+
+* 2010
+
+* 2010
+
+- rsync Android source to NFS is high latency per file
+- May 1: rewrite in Go
+- gotsync: Go tree sync.
+- ... goroutine fork bomb.
+
+* May 3, 2010
+
+.html giddy.html
+
+* It kinda works
+
+.html russ-gotsync.html
+
+* Utimes
+
+.html utimes.html
+
+* os.Chtimes
+
+  changeset:   5444:aaa902b78832
+  user:        Russ Cox <rsc@golang.org>
+  date:        Wed May 05 12:49:59 2010 -0700
+  summary:     CONTRIBUTORS: add Brad Fitzpatrick (Google Inc)
+
+(code review)
+
+  changeset:   5490:a79cd7447eaa
+  user:        Brad Fitzpatrick <brad@danga.com>
+  date:        Wed May 19 17:48:53 2010 -0700
+  summary:     os: add Chtimes function
+
+* A trip back in time...
 
 .link http://localhost:3998/shell/earlygo/ Early go
+
+* 2010
+
+- Bus rides
+- Storage system dream
+
+* Too many CMSes, written, maintained, and/or used
+
+- livejournal
+- photo system
+- scanningcabinet: scanned docs
+- my websites
+- other company's services (Google, Twitter, Facebook, etc)
+- file systems
+- phones
+- Unify all?
+
+* Which language for bus hacking?
+
+- Perl and Python: too slow and single-threaded
+- C++ and Java: too tedious and not fun (slow builds, etc)
+- Go?
+
+* Jun 2010: Camlistore hacking begins...
+
+.link http://localhost:3998/shell/earlycam/ Early Camlistore
+
+* Problems
+
+- Jun 12th: filed my first bug (861: can't do non-chunked responses)
+- start fixing HTTP client & server bugs
 
 * Camlistore
 

@@ -10,6 +10,8 @@ Timeline:
 
    2009-02-06: Russ adds closures to 6g.
 
+   2009-10-30: join Android
+
    2009-11-10: Go is public open source project: http://google-opensource.blogspot.com/2009/11/hey-ho-lets-go.html
    2010-05-01: https://github.com/bradfitz/gotsync/commit/86f480fc7afc85152e95357c71729910daa7f2e2
 
@@ -321,6 +323,28 @@ summary:     A+C: add Blake Mizerany (Individual CLA)
 user:        Brad Fitzpatrick <bradfitz@golang.org>
 date:        Wed Jan 25 17:47:57 2012 -0800
 summary:     cmd/goapi: new tool for tracking exported API over time
+
+
+commit 0714a463c96c9f3eea0f576cc67b6b66d46cb6ee
+Author: Brad Fitzpatrick <brad@danga.com>
+Date:   Sat Feb 18 21:53:06 2012 -0800
+
+    Update from r60 to [almost] Go 1.
+
+    A lot is still broken, but most stuff at least compiles now.
+
+    The directory tree has been rearranged now too.  Go libraries are now
+    under "pkg".  Fully qualified, they are e.g. "camlistore.org/pkg/jsonsign".
+
+    The go tool cannot yet fetch from arbitrary domains, but discussion is
+    happening now on which mechanism to use to allow that.
+
+    For now, put the camlistore root under $GOPATH/src.  Typically $GOPATH
+    is $HOME, so Camlistore should be at $HOME/src/camlistore.org.
+
+    Then you can:
+
+    $ go build ./server/camlistored
 
 
 
