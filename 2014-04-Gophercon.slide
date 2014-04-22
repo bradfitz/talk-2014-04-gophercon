@@ -110,6 +110,33 @@ http://bradfitz.com/
 
 .link http://localhost:3998/shell/earlycam/ Early Camlistore
 
+* Jun 2010:
+
+- MIME multipart reading in Camlistore (needed for App Engine file uploads)
+- became the mime/multipart package in July
+
+* Oct 11, 2010
+
+.html to-agl-gpg.html
+
+* Oct 12, 2010
+
+.html from-agl-gpg.html
+
+* 2011
+
+* 2011
+
+- Jan: talk with Rob about Camlistore
+- April: join the Go team full-time
+
+* Jun 2011
+
+- Camlistore was still running gpg as a child process for some things
+- Redo the os/exec package
+
+.html execdiff.html
+
 * Problems
 
 - Jun 12th: filed my first bug (861: can't do non-chunked responses)
