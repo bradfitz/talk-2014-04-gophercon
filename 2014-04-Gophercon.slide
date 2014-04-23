@@ -7,10 +7,18 @@ Brad Fitzpatrick
 brad@danga.com
 http://bradfitz.com/
 
-* Story time
+* There's no I in TEAM
 
+- ... but there's a lot in this talk.
+
+
+* Overview
+
+- Camlistore
 - How I got into Go
+- My (often Camlistore) motivations modifying the standard library
 - Prepare to learn nothing
+- Story time...
 
 * Pre-Google
 
@@ -18,32 +26,38 @@ http://bradfitz.com/
 
 - Perl & C
 - Slow & fun ... or fast & tedious.
-- Happy enough.
+- Usually picked Perl
+- What option did I have?
+- Accepted both crappy worlds
 
 * Late 2007
 
 * Google language options:
 
-- C++, Java, and Python
-- Fast & tedious
-- Verbose & tedious
-- Slow & tedious
+- C++, Java, and Python:
+- ... Fast & often unsafe & tedious
+- ... Verbose & safter & tedious
+- ... Slow & single-threaded & tedious
 - (oh, and Sawzall: weird & kinda neat but often lacking)
 
 * Late 2008 Techtalk
 
-"Does the language have closures?"
+- Go crew presents Go
 
-"Yeah, yeah, everybody wants their pet feature."
+Audience: "Does the language have closures?"
+
+Rob: "Yeah, yeah, everybody wants their pet feature."
 
 - But glimmer of hope: not C++, not Java, not Python.
 - (Go gets closures in February anyway)
 
 * 2009
 
-- Android, write even more Java.
+- officially join Android, write even more Java.
 
-.link http://google-opensource.blogspot.com/2009/11/hey-ho-lets-go.html November: Go is open source 
+- November: Go is open source:
+
+.link http://google-opensource.blogspot.com/2009/11/hey-ho-lets-go.html Hey! Ho! Let's Go!
 
 * 2010
 
@@ -51,8 +65,8 @@ http://bradfitz.com/
 
 - rsync Android source to NFS is high latency per file
 - May 1: rewrite in Go
-- gotsync: Go tree sync.
-- ... goroutine fork bomb.
+- ... gotsync: Go tree sync.
+
 
 * May 3, 2010
 
@@ -100,6 +114,23 @@ http://bradfitz.com/
 - phones
 - Unify all?
 
+* Fast forward to 2014: Camlistore today
+
+* Camlistore today
+
+- Local disk, S3, Glacier, Google storage, App Engine, LevelDB, MySQL, Postgres, SQLite, Mongo
+- Cloud or local or mix
+- Replicate (sync or async), shard, encrypt to anything else, itself
+- Command-line, API, Web, and FUSE
+- Huge 5TB files or small objects (tweets, likes, GPS points)
+
+* Screenshots
+
+.link /img/cam-fuse.png FUSE
+.link /img/ Web UI
+
+* Rewind back to 2010:
+
 * Which language for bus hacking?
 
 - Perl and Python: too slow and single-threaded
@@ -112,7 +143,8 @@ http://bradfitz.com/
 
 * Jun 2010:
 
-- MIME multipart reading in Camlistore (needed for App Engine file uploads)
+- MIME multipart reading in Camlistore (needed for Python App Engine file uploads)
+- ... wanted multi-language implementations of clients & servers
 - became the mime/multipart package in July
 
 * Oct 11, 2010
@@ -125,10 +157,9 @@ http://bradfitz.com/
 
 * 2011
 
-* 2011
+* Jan 2011
 
-- Jan: talk with Rob about Camlistore
-- April: join the Go team full-time
+- talk with Rob about Camlistore
 
 * Jun 2011
 
@@ -142,6 +173,43 @@ http://bradfitz.com/
 - Jun 12th: filed my first bug (861: can't do non-chunked responses)
 - start fixing HTTP client & server bugs
 
+* April 2011
+
+- join the Go team full-time
+
+- json: keep track of error offset in SyntaxError
+
+- os/user: new package to look up users
+
+.link http://localhost:3998/shell/cam/ Demo
+
+* May 2011
+
+- png: speed up opaque RGBA encoding
+- jpeg: speed up RGBA encoding ~%50
+- syscall: sendfile
+- io, net, http: sendfile support
+- http: add Request.SetBasicAuth method
+- ... wanted for Camlistore
+
+* Sep 2011
+
+- exp/sql{,/driver}: new database packages
+- ... initially prototyped in Camlistore
+
+* 2012
+
+* Sep 2012
+
+- net/http: add ServeContent
+
+* Etc
+
+- ReverseProxy
+- utf8.Valid/ValidString
+- arm: use the correct stat syscalls
+- io.MultiReader, io.MultiWriter
+
 * Camlistore
 
 - ~4 years open source
@@ -154,13 +222,6 @@ http://bradfitz.com/
 - is a scanned photo a scan, a photo, or a blog post? who cares.
 - write *one CMS to rule them all*
 - ... or at least a good framework for higher-level CMSes
-
-* Protocols, not companies
-
-- I believe in protocols and standards
-- ... not in companies
-- Companies can run hosted versions of protocols (gmail for IMAP+SMTP)
-- ... but I control where my domain name points to
 
 * Overview
 
@@ -213,7 +274,7 @@ http://bradfitz.com/
 - Indexed
 - Storage
 
-* Advantages of Content-addressable
+* Content-addressable
 
 - sync any which way, no conflicts
 - (merge resolution at higher layers)
@@ -226,10 +287,6 @@ http://bradfitz.com/
 - indexing
 - search
 - web UI, FUSE, CLI, apps are just clients of search + blob storage.
-
-* Logically
-
-.image arch.png
 
 * Reality
 
@@ -285,10 +342,6 @@ http://bradfitz.com/
 
 (demo)
 
-* Overview
-
-.image fsbackup.png
-
 * Two abstractions
 
 - [[http://localhost:6060/pkg/camlistore.org/pkg/blobserver/#Storage][Blob storage]] (sha1-xxxx -> bytes)
@@ -329,27 +382,12 @@ http://bradfitz.com/
 - ...
 - (demo)
 
-* Web UI
-
-- React
-- Infinite scroll
-- Lightbox
-- HTML history API
-- Search
-
 * Search
 
 - high-level one-liner expression search ("is:image -format:jpeg")
 - low-level structured search (nested tree of operators, fields, set unions/intersections, etc)
 
 .image search.png
-
-* Tools
-
-- camget (blobs, trees, shares)
-- camput (blobs, files, dirs, shares, permanodes, claims)
-- camtool {init,sync,init,describe,claims,...}
-- cammount
 
 * Camlistore is pure Go: (no C)
 
@@ -361,7 +399,8 @@ http://bradfitz.com/
 - GIF/JPG/PNG enc/dec, resizing, thumbnails
 - FUSE
 - Notification bus
-- database/sql, MySQL, Postgres, Mongo, 
+- database/sql, MySQL, Postgres, Mongo,
+- S3, Glacier,
 - OpenPGP signing & verification
 - ....
 

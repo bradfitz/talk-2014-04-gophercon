@@ -369,15 +369,3 @@ I heard about this new language, Go...
 
 Show Camlistore today.
 Show standard library over time.
-
-
-
-
-
-
-[X] mime/multipart
-[ ] database/sql
-[X] os/exec
-[ ] http
-[X] openpgp
-[ ] sendfile

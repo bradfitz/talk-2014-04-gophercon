@@ -42,7 +42,9 @@ var presentURL = httputil.NewSingleHostReverseProxy(&url.URL{
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
-	if path == "/" || strings.HasSuffix(path, ".slide") || strings.HasPrefix(path, "/static/") {
+	if path == "/" || strings.HasSuffix(path, ".slide") ||
+		strings.HasPrefix(path, "/static/") ||
+		strings.HasSuffix(path, ".png") {
 		presentURL.ServeHTTP(w, r)
 		return
 	}
@@ -226,6 +228,7 @@ func main() {
 	exec.Command("killall", "present").Run()
 	exec.Command("killall", "shellinabox").Run()
 	presentCmd := exec.Command("present", ".")
+	presentCmd.Dir = filepath.Join(os.Getenv("HOME"), "talks", "2014-04-Gophercon")
 	if err := presentCmd.Start(); err != nil {
 		log.Fatalf("Error starting present: %v", err)
 	}
@@ -234,6 +237,7 @@ func main() {
 		log.Fatalf("Can't find shellinaboxd in path")
 	}
 	http.HandleFunc("/shell/", handleShell)
+	http.Handle("/img/", http.FileServer(http.Dir(filepath.Join(os.Getenv("HOME"), "talks", "2014-04-Gophercon"))))
 	http.HandleFunc("/", handleRoot)
 
 	log.Printf("Presenting to Gophercon 2014 on http://%s", *listenFlag)
