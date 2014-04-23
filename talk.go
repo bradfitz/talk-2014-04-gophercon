@@ -86,17 +86,22 @@ func handleShell(w http.ResponseWriter, r *http.Request) {
 	groups := strings.Fields(string(groupsb))
 
 	dockerPath, _ := exec.LookPath("docker")
-	script := fmt.Sprintf(`#!/bin/sh
+
+	program := "/bin/bash"
+	if name != "local" {
+		script := fmt.Sprintf(`#!/bin/sh
 export DOCKER_HOST=%s
 %s --tag=%s --docker=%s
 `, os.Getenv("DOCKER_HOST"), os.Args[0], name, dockerPath)
-	f, err := ioutil.TempFile("", "")
-	if err != nil {
-		log.Fatalf("TempFile: %v", err)
+		f, err := ioutil.TempFile("", "")
+		if err != nil {
+			log.Fatalf("TempFile: %v", err)
+		}
+		f.Write([]byte(script))
+		f.Close()
+		os.Chmod(f.Name(), 0770)
+		program = f.Name()
 	}
-	f.Write([]byte(script))
-	f.Close()
-	os.Chmod(f.Name(), 0770)
 
 	u, err := user.Current()
 	if err != nil {
@@ -107,7 +112,7 @@ export DOCKER_HOST=%s
 		"--no-beep",
 		"--disable-ssl",
 		fmt.Sprintf("--port=%d", port),
-		fmt.Sprintf("--service=/shell/%s:%s:%s:%s:%s", name, u.Username, groups[0], u.HomeDir, f.Name()),
+		fmt.Sprintf("--service=/shell/%s:%s:%s:%s:%s", name, u.Username, groups[0], u.HomeDir, program),
 	}
 	css := filepath.Join(os.Getenv("HOME"), "talks", "2014-04-Gophercon", "shell.css")
 	if _, err := os.Stat(css); err == nil {
