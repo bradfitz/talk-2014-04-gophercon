@@ -255,6 +255,15 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 - Jun 12th: filed my first bug (861: can't do non-chunked responses)
 - start fixing HTTP client & server bugs
 
+* Feb 2011
+
+- http: introduce start of Client and ClientTransport
+
+* March 2011
+
+- http: add packages http/cgi and http/httptest
+- ... for camlistore.org's gitweb CGI browser
+
 * April 2011
 
 - join the Go team full-time
@@ -273,6 +282,10 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 - http: add Request.SetBasicAuth method
 - ... wanted for Camlistore
 
+* July 2011
+
+- adg added "archive/zip: add Writer"
+
 * Sep 2011
 
 - exp/sql{,/driver}: new database packages
@@ -284,9 +297,17 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 
 * 2012
 
-* Sep 2012
+* Feb 2012
 
 - net/http: add ServeContent
+
+* March 2012
+
+- cmd/go: allow go get with arbitrary URLs
+
+  $ go get camlistore.org/server/camlistored
+
+- March 28: Go 1 released
 
 * 2013
 

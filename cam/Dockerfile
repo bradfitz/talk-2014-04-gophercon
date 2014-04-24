@@ -48,5 +48,7 @@ RUN (echo "#!/bin/sh"; echo "exec camlistored 2>/dev/null") > /home/gopher/bin/d
 RUN chmod +x /home/gopher/bin/d
 RUN sudo usermod -a -G fuse gopher
 
+RUN go get code.google.com/p/go.tools/cmd/godoc
+
 ENTRYPOINT /bin/bash
 
