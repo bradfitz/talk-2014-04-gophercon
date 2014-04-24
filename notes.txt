@@ -369,3 +369,5 @@ I heard about this new language, Go...
 
 Show Camlistore today.
 Show standard library over time.
+
+strings.Replacer?

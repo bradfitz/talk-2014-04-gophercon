@@ -11,13 +11,19 @@ http://bradfitz.com/
 
 - ... but there's a lot in this talk.
 
+* Talk? Of course!
+
+- Two projects I love:
+- ... Go standard library
+- ... Camlistore
+- Can I make a talk out of them both? Let's see...
 
 * Overview
 
 - How I got into Go
 - Camlistore
 - My (often Camlistore) motivations modifying the standard library
-- Prepare to learn nothing
+- Prepare to learn nothing!
 - Story time...
 
 * Pre-Google
@@ -39,8 +45,8 @@ http://bradfitz.com/
 - ... Slow & single-threaded & tedious
 - (oh, and Sawzall: weird & kinda neat but often lacking)
 - Javascript: quest for common language?
-- ... C++ + Sawzall + SpiderMonkey
-- ... Java + Rhino
+- ... C++, Sawzall, SpiderMonkey
+- ... Java, Rhino
 * Late 2008 Techtalk
 
 - Go crew presents Go
@@ -111,9 +117,31 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 - scanningcabinet: scanned docs
 - my websites
 - other company's services (Google, Twitter, Facebook, etc)
-- file systems
+- file systems on lots of hosts
 - phones
+- fear of {overwriting, losing, duplicating} things
 - Unify all?
+
+* Camlistore
+
+- Content-Addressable
+- Multi-Level
+- Indexed
+- Storage
+
+* Content-addressable
+
+- sync any which way, no conflicts
+- (merge resolution at higher layers)
+- corruption verification/repair
+- de-duping
+
+* Multi-Level
+
+- blob storage
+- indexing
+- search
+- web UI, FUSE, CLI, apps are just clients of search + blob storage.
 
 * Fast forward to 2014: Camlistore today
 
@@ -127,8 +155,13 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 
 * Screenshots
 
+.link /img/cam-mix-types.png Web UI
+.link /img/cam-moscow.png Location search
+.link /img/cam-pano.png Panos
+.link /img/cam-paris-portrait.png Paris + Portrait
+.link /img/cam-other.png Non-images
 .link /img/cam-fuse.png FUSE
-.link /img/ Web UI
+.link /img/cam-android.png Android
 
 * Rewind back to 2010:
 
@@ -142,11 +175,20 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 
 .link http://localhost:3998/shell/earlycam/ Early Camlistore
 
-* Jun 2010:
+* Jun 2010
 
 - MIME multipart reading in Camlistore (needed for Python App Engine file uploads)
 - ... wanted multi-language implementations of clients & servers
 - became the mime/multipart package in July
+
+* July 2010
+
+- io.MultiReader, io.MultiWriter
+
+* Sep 2010
+
+- arm: use the correct stat syscalls
+- ... debugging Android problems with Go
 
 * Oct 11, 2010
 
@@ -177,10 +219,9 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 * April 2011
 
 - join the Go team full-time
-
-- json: keep track of error offset in SyntaxError
-
 - os/user: new package to look up users
+- http: reverse proxy handler
+- json: keep track of error offset in SyntaxError
 
 .link http://localhost:3998/shell/cam/ Demo
 
@@ -198,162 +239,82 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 - exp/sql{,/driver}: new database packages
 - ... initially prototyped in Camlistore
 
+* Oct 2011
+
+- utf8.Valid, utf8.ValidString
+
 * 2012
 
 * Sep 2012
 
 - net/http: add ServeContent
 
-* Etc
+* 2013
 
-- ReverseProxy
-- utf8.Valid/ValidString
-- arm: use the correct stat syscalls
-- io.MultiReader, io.MultiWriter
+* Jan 2013
+
+- encoding/json: add Decoder.Buffered accessor to get overread data
+
+* Feb 2013
+
+- net/http: add Next Protocol Negotation upgrade support to the Server
+
+* May 2013
+
+- encoding/json: allocate less in NewEncoder
+
+* Aug 2013
+
+- encoding/json: faster encoding
+- testing: add TB, an interface common to T and B
+
+* Dec 2013
+
+- encoding/json: speed up decoding
+- sync.Pool
+
+* 2014
+
+* Mar 2014
+
+- crypto/tls: make Conn.Read return (n, io.EOF) when EOF is next in buffer
+
+* Go 1.3
+
+* Go 1.3
+
+- sync.Pool: reduce garbage + standing memory usage
+- copying stacks: no random performance fluctations
+- precise GC: important for Camlistore's 32-bit ARM Android build
+
+* Go 1.3
+
+- m[string(byteSlice)] is free
+
+.image img/cam-boot.png
+
+* Go 1.3
+
+- Camlistore's build bots found differences between Go 1.2 & tip; documented.
 
 * Camlistore
 
 - ~4 years open source
 - "Camlistore is a way to store, sync, share, model and back up content"
-
-* Motivation
-
-- I've written too many Content Management Systems
-- blogs, comments, photos, emails, backups, scanned paperwork, ...
-- is a scanned photo a scan, a photo, or a blog post? who cares.
-- write *one CMS to rule them all*
-- ... or at least a good framework for higher-level CMSes
-
-* Overview
-
 - "personal storage system for life"
 - user in control
 - everything private by default
 - no corporate SPOF
-
-* Problem
-
-- tools vs storage
-- should be separate roles
-- "The cloud" has started to blend them together
-- separate them back out
-
-* What I want
-
-- something simple
-- something cheap
-- something reliable (survive past me)
-- to not worry (about sync, about companies)
-
-* Data archaeology
-
-- data and data models should be easy to understand
-- now
-- and in 100+ years
-
-* Camlistore is....
-
-- one private dumping ground to store anything
-- ... backups, filesystems, objects, photos, likes, bookmarks, shares, my website, ...
-- ... copy of everything (every web page) I read.
-- live backup my phones
-- live replication / sync of my dumping group between my house & laptop & {Amazon,Google,Dropbox}{2,}
-- web UI, FUSE, CLI tools
-- Easy for end-users; powerful for dorks
-
-* Security model
-
-- *your* private repo, for life
-- everything private by default
-- grant access to specific objects/trees with friends or the world
-- web UI or CLI tools let you share
-
-* Camlistore's terrible name
-
-- Content-Addressable
-- Multi-Level
-- Indexed
-- Storage
-
-* Content-addressable
-
-- sync any which way, no conflicts
-- (merge resolution at higher layers)
-- corruption verification/repair
-- de-duping
-
-* Multi-Level
-
-- blob storage
-- indexing
-- search
-- web UI, FUSE, CLI, apps are just clients of search + blob storage.
-
-* Reality
-
-- Normal users: hosted version
-- Dorks: single self-contained binary
-
-* From the bottom up...
-
-* Blob Server
-
-* Blob Server (very dumb)
-
-- "Blob": 0B - 16MB
-- private operations, to owner of data only:
-- ... Get, Put
-- ... Stat (check existence + get size)
-- ... Enumerate all blobs
-- no public (non-owner) access
-- HTTP interface: {GET,PUT,HEAD} /sha1-xxxxxxx HTTP/1.1
-- Delete is disabled by default. Privileged op for GC only.
-
-* Blob Server: seriously, no metadata
-
-- no filenames
-- no "mime types"
-- no "{create,mod,access} time"
-- size is implicit
-- blob: just some bytes
-- metadata? layers above.
-
-* Modeling data
-
-* Modeling static data
-
-(demo)
-
-* Modeling dynamic data
-
-- how to represent mutable data in a content-addressable world?
-- mutations would change root "commit" hash
-
-* Permanodes
-
-* Permanodes
-
-- immutable handle to reference ("the permanode")
-- mutation claims against that permanode (their own claims)
-- data model: key/values
-- all keys' values are single- or multi-valued
-- ... convention per-key
-
-* Permanodes 
-
-(demo)
+- aggregate & search everything from everywhere
 
 * Two abstractions
-
-- [[http://localhost:6060/pkg/camlistore.org/pkg/blobserver/#Storage][Blob storage]] (sha1-xxxx -> bytes)
-- [[http://localhost:6060/pkg/camlistore.org/pkg/sorted/#KeyValue][sorted.KeyValue]] (get, set, enumerate)
 
 * 1) Blob storage
 
 - get/set content-addressable blobs
-- size: 1 byte to 16 MB. (in practice: 64-256 KB)
+- size: 0 bytes to 16 MB. (in practice: 64-256 KB)
 - enumerate all
-- filesystem, block device, S3, Google Storage, Google Drive, App Engine, WeedFS, ...
+- filesystem, block device, S3, Google Storage, Google Drive, App Engine, WeedFS, Mongo, ...
 
 * 2) Key/Value storage
 
@@ -369,26 +330,10 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 - ... Flickr, LJ, Facebook, G+, Twitter, Foursquare, etc...
 - export to whoever you want, under any API
 
-* Storing big files
-
-- rolling checksums
-- 32-bit checksum over 64 byte rolling window
-- 14 or more lower bits sets: break point
-- more bits -> stronger break
-
-* FUSE
-
-- proper filesystem, not rsync hackery
-- can have TBs logically available on 100 GB laptop
-- ...
-- (demo)
-
 * Search
 
 - high-level one-liner expression search ("is:image -format:jpeg")
 - low-level structured search (nested tree of operators, fields, set unions/intersections, etc)
-
-.image search.png
 
 * Camlistore is pure Go: (no C)
 
