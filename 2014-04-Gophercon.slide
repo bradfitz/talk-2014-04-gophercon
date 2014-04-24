@@ -147,11 +147,48 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 
 * Camlistore today
 
+- ~4 years open source
+- "Camlistore is a way to store, sync, share, model and back up content"
+- "personal storage system for life"
+- user in control
+- everything private by default
+- no corporate SPOF
+- aggregate & search everything from everywhere
+
+* Camlistore today
+
 - Local disk, S3, Glacier, Google storage, App Engine, LevelDB, MySQL, Postgres, SQLite, Mongo
 - Cloud or local or mix
 - Replicate (sync or async), shard, encrypt to anything else, itself
 - Command-line, API, Web, and FUSE
+- POSIX filesystem or just objects
 - Huge 5TB files or small objects (tweets, likes, GPS points)
+
+* Camlistore today: import / export
+
+- slurp from web services into Camlistore
+- ... Flickr, LJ, Facebook, G+, Twitter, Foursquare, etc...
+- export to whoever you want, under any API
+
+* Camlistore today: search
+
+- high-level one-liner expression search ("is:image -format:jpeg")
+- low-level structured search (nested tree of operators, fields, set unions/intersections, etc)
+
+* Camlistore is pure Go: (no C)
+
+- HTTP client/server, TLS, AES, ...
+- JSON, XML
+- WebSockets
+- SMTP server
+- Rolling checksums
+- GIF/JPG/PNG enc/dec, resizing, thumbnails
+- FUSE
+- Notification bus
+- database/sql, MySQL, Postgres, Mongo,
+- S3, Glacier,
+- OpenPGP signing & verification
+- ....
 
 * Screenshots
 
@@ -183,12 +220,14 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 
 * July 2010
 
+.image tee.png
 - io.MultiReader, io.MultiWriter
 
 * Sep 2010
 
 - arm: use the correct stat syscalls
-- ... debugging Android problems with Go
+- ... debugging Android performance with Go
+- ... easier than C cross-compiling spells
 
 * Oct 11, 2010
 
@@ -297,57 +336,6 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 
 - Camlistore's build bots found differences between Go 1.2 & tip; documented.
 
-* Camlistore
+* Demos
 
-- ~4 years open source
-- "Camlistore is a way to store, sync, share, model and back up content"
-- "personal storage system for life"
-- user in control
-- everything private by default
-- no corporate SPOF
-- aggregate & search everything from everywhere
 
-* Two abstractions
-
-* 1) Blob storage
-
-- get/set content-addressable blobs
-- size: 0 bytes to 16 MB. (in practice: 64-256 KB)
-- enumerate all
-- filesystem, block device, S3, Google Storage, Google Drive, App Engine, WeedFS, Mongo, ...
-
-* 2) Key/Value storage
-
-- atomically set/delete 1+ Key = Value
-- atomic commits
-- aribtrary keys and values
-- enumerate in sorted order
-- SQLite, MySQL, Postgres, Mongo, LevelDB, cznic/kv, Dynamo, App Engine, ...
-
-* Import / export
-
-- slurp from web services into Camlistore
-- ... Flickr, LJ, Facebook, G+, Twitter, Foursquare, etc...
-- export to whoever you want, under any API
-
-* Search
-
-- high-level one-liner expression search ("is:image -format:jpeg")
-- low-level structured search (nested tree of operators, fields, set unions/intersections, etc)
-
-* Camlistore is pure Go: (no C)
-
-- HTTP client/server, TLS, AES, ...
-- JSON, XML
-- WebSockets
-- SMTP server
-- Rolling checksums
-- GIF/JPG/PNG enc/dec, resizing, thumbnails
-- FUSE
-- Notification bus
-- database/sql, MySQL, Postgres, Mongo,
-- S3, Glacier,
-- OpenPGP signing & verification
-- ....
-
-* More demos, questions
