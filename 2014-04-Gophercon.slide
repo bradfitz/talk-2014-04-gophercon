@@ -14,8 +14,8 @@ http://bradfitz.com/
 
 * Overview
 
-- Camlistore
 - How I got into Go
+- Camlistore
 - My (often Camlistore) motivations modifying the standard library
 - Prepare to learn nothing
 - Story time...
@@ -24,11 +24,10 @@ http://bradfitz.com/
 
 * Pre-Google
 
-- Perl & C
-- Slow & fun ... or fast & tedious.
-- Usually picked Perl
-- What option did I have?
-- Accepted both crappy worlds
+- Perl, C
+- ... Slow & fun
+- ... or fast & tedious?
+- Accepted the extremes and trade-offs
 
 * Late 2007
 
@@ -36,10 +35,12 @@ http://bradfitz.com/
 
 - C++, Java, and Python:
 - ... Fast & often unsafe & tedious
-- ... Verbose & safter & tedious
+- ... Verbose & safer & tedious
 - ... Slow & single-threaded & tedious
 - (oh, and Sawzall: weird & kinda neat but often lacking)
-
+- Javascript: quest for common language?
+- ... C++ + Sawzall + SpiderMonkey
+- ... Java + Rhino
 * Late 2008 Techtalk
 
 - Go crew presents Go
@@ -66,7 +67,7 @@ Rob: "Yeah, yeah, everybody wants their pet feature."
 - rsync Android source to NFS is high latency per file
 - May 1: rewrite in Go
 - ... gotsync: Go tree sync.
-
+- ... goroutine forkbomb per file/dir
 
 * May 3, 2010
 
